@@ -9,7 +9,7 @@ vi ~/.ssh/config
 内容:  
 user sangjun
 </code>
-
+ 
 ### 代码获取  
 1. 创建一个空目录  
 2. 获取仓库  
