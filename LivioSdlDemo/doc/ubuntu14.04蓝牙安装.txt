@@ -1,0 +1,8 @@
+一. ubuntu下安装蓝牙驱动并调通发送和接收文件.
+1. 安装以下软件包
+sudo apt-get install blueman
+sudo apt-get install libbluetooth3=4.101-0ubuntu13
+sudo apt-get install libbluetooth-dev
+sudo apt-get install bluez-tools
+
+2. 使用Bluetooth Manager尝试发送和接收文件. 如果失败，再重启电脑试下.

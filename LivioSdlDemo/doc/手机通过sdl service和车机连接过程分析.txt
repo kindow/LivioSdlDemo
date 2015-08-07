@@ -1,0 +1,14 @@
+连接过程如下: 
+1. 手机端启动.
+2. 手机端连接sdl service成功.
+3. 手机在sdl service 注册.
+4. 手机选择连接方式，并输入相关信息(ip/port).然后通知sdl service开始连接.
+5. sdl Service接到通知后,将自启动一个连接尝试.(不会返回结果给手机，也即此时是异步事件了)
+6. sdl service 连接车机成功后，会从车机接到信息（onOnHMIStatus）。会发送一个通知(SDL_HMI_FIRST_DISPLAYED)给手机(sendMessageToRegisteredClients)，表示它已经和车机连接成功了.
+
+特别注意5，6部分。 手机通过sdl service 连接车机是一个异步的过程. 
+手机通知sdl service开始连接车机.
+sdl 开始连接车机.并一直监听连接状态，而不会马上返回连接结果给手机.
+车机和sdl service连接成功后，sdl service会通过onOnHMIStatus接收到车机发送的消息。转而通知手机连接成功. 
+
+
