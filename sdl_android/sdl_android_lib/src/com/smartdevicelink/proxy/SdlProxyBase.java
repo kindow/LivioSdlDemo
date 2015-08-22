@@ -1,9 +1,5 @@
 package com.smartdevicelink.proxy;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -21,6 +17,11 @@ import java.net.URL;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.Context;
@@ -31,8 +32,6 @@ import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.smartdevicelink.proxy.RPCRequestFactory;
-import com.smartdevicelink.proxy.rpc.PutFile;
 import com.smartdevicelink.Dispatcher.IDispatchingStrategy;
 import com.smartdevicelink.Dispatcher.IncomingProtocolMessageComparitor;
 import com.smartdevicelink.Dispatcher.InternalProxyMessageComparitor;
@@ -54,7 +53,100 @@ import com.smartdevicelink.proxy.callbacks.OnError;
 import com.smartdevicelink.proxy.callbacks.OnProxyClosed;
 import com.smartdevicelink.proxy.interfaces.IProxyListenerALM;
 import com.smartdevicelink.proxy.interfaces.IProxyListenerBase;
-import com.smartdevicelink.proxy.rpc.*;
+import com.smartdevicelink.proxy.rpc.AddCommand;
+import com.smartdevicelink.proxy.rpc.AddCommandResponse;
+import com.smartdevicelink.proxy.rpc.AddSubMenu;
+import com.smartdevicelink.proxy.rpc.AddSubMenuResponse;
+import com.smartdevicelink.proxy.rpc.Alert;
+import com.smartdevicelink.proxy.rpc.AlertResponse;
+import com.smartdevicelink.proxy.rpc.AudioPassThruCapabilities;
+import com.smartdevicelink.proxy.rpc.ButtonCapabilities;
+import com.smartdevicelink.proxy.rpc.ChangeRegistration;
+import com.smartdevicelink.proxy.rpc.ChangeRegistrationResponse;
+import com.smartdevicelink.proxy.rpc.Choice;
+import com.smartdevicelink.proxy.rpc.CreateInteractionChoiceSet;
+import com.smartdevicelink.proxy.rpc.CreateInteractionChoiceSetResponse;
+import com.smartdevicelink.proxy.rpc.DeleteCommand;
+import com.smartdevicelink.proxy.rpc.DeleteCommandResponse;
+import com.smartdevicelink.proxy.rpc.DeleteFile;
+import com.smartdevicelink.proxy.rpc.DeleteFileResponse;
+import com.smartdevicelink.proxy.rpc.DeleteInteractionChoiceSet;
+import com.smartdevicelink.proxy.rpc.DeleteInteractionChoiceSetResponse;
+import com.smartdevicelink.proxy.rpc.DeleteSubMenu;
+import com.smartdevicelink.proxy.rpc.DeleteSubMenuResponse;
+import com.smartdevicelink.proxy.rpc.DiagnosticMessageResponse;
+import com.smartdevicelink.proxy.rpc.DisplayCapabilities;
+import com.smartdevicelink.proxy.rpc.EndAudioPassThru;
+import com.smartdevicelink.proxy.rpc.EndAudioPassThruResponse;
+import com.smartdevicelink.proxy.rpc.GenericResponse;
+import com.smartdevicelink.proxy.rpc.GetDTCsResponse;
+import com.smartdevicelink.proxy.rpc.GetVehicleData;
+import com.smartdevicelink.proxy.rpc.GetVehicleDataResponse;
+import com.smartdevicelink.proxy.rpc.Headers;
+import com.smartdevicelink.proxy.rpc.Image;
+import com.smartdevicelink.proxy.rpc.ListFiles;
+import com.smartdevicelink.proxy.rpc.ListFilesResponse;
+import com.smartdevicelink.proxy.rpc.OnAppInterfaceUnregistered;
+import com.smartdevicelink.proxy.rpc.OnAudioPassThru;
+import com.smartdevicelink.proxy.rpc.OnButtonEvent;
+import com.smartdevicelink.proxy.rpc.OnButtonPress;
+import com.smartdevicelink.proxy.rpc.OnCommand;
+import com.smartdevicelink.proxy.rpc.OnDriverDistraction;
+import com.smartdevicelink.proxy.rpc.OnHMIStatus;
+import com.smartdevicelink.proxy.rpc.OnHashChange;
+import com.smartdevicelink.proxy.rpc.OnKeyboardInput;
+import com.smartdevicelink.proxy.rpc.OnLanguageChange;
+import com.smartdevicelink.proxy.rpc.OnPermissionsChange;
+import com.smartdevicelink.proxy.rpc.OnSystemRequest;
+import com.smartdevicelink.proxy.rpc.OnTBTClientState;
+import com.smartdevicelink.proxy.rpc.OnTouchEvent;
+import com.smartdevicelink.proxy.rpc.OnVehicleData;
+import com.smartdevicelink.proxy.rpc.PerformAudioPassThru;
+import com.smartdevicelink.proxy.rpc.PerformAudioPassThruResponse;
+import com.smartdevicelink.proxy.rpc.PerformInteraction;
+import com.smartdevicelink.proxy.rpc.PerformInteractionResponse;
+import com.smartdevicelink.proxy.rpc.PresetBankCapabilities;
+import com.smartdevicelink.proxy.rpc.PutFile;
+import com.smartdevicelink.proxy.rpc.PutFileResponse;
+import com.smartdevicelink.proxy.rpc.ReadDIDResponse;
+import com.smartdevicelink.proxy.rpc.RegisterAppInterface;
+import com.smartdevicelink.proxy.rpc.RegisterAppInterfaceResponse;
+import com.smartdevicelink.proxy.rpc.ResetGlobalProperties;
+import com.smartdevicelink.proxy.rpc.ResetGlobalPropertiesResponse;
+import com.smartdevicelink.proxy.rpc.ScrollableMessage;
+import com.smartdevicelink.proxy.rpc.ScrollableMessageResponse;
+import com.smartdevicelink.proxy.rpc.SdlMsgVersion;
+import com.smartdevicelink.proxy.rpc.SetAppIcon;
+import com.smartdevicelink.proxy.rpc.SetAppIconResponse;
+import com.smartdevicelink.proxy.rpc.SetDisplayLayout;
+import com.smartdevicelink.proxy.rpc.SetDisplayLayoutResponse;
+import com.smartdevicelink.proxy.rpc.SetGlobalProperties;
+import com.smartdevicelink.proxy.rpc.SetGlobalPropertiesResponse;
+import com.smartdevicelink.proxy.rpc.SetMediaClockTimer;
+import com.smartdevicelink.proxy.rpc.SetMediaClockTimerResponse;
+import com.smartdevicelink.proxy.rpc.Show;
+import com.smartdevicelink.proxy.rpc.ShowResponse;
+import com.smartdevicelink.proxy.rpc.Slider;
+import com.smartdevicelink.proxy.rpc.SliderResponse;
+import com.smartdevicelink.proxy.rpc.SoftButton;
+import com.smartdevicelink.proxy.rpc.SoftButtonCapabilities;
+import com.smartdevicelink.proxy.rpc.Speak;
+import com.smartdevicelink.proxy.rpc.SpeakResponse;
+import com.smartdevicelink.proxy.rpc.SubscribeButton;
+import com.smartdevicelink.proxy.rpc.SubscribeButtonResponse;
+import com.smartdevicelink.proxy.rpc.SubscribeVehicleData;
+import com.smartdevicelink.proxy.rpc.SubscribeVehicleDataResponse;
+import com.smartdevicelink.proxy.rpc.SystemRequest;
+import com.smartdevicelink.proxy.rpc.SystemRequestResponse;
+import com.smartdevicelink.proxy.rpc.TTSChunk;
+import com.smartdevicelink.proxy.rpc.UnregisterAppInterface;
+import com.smartdevicelink.proxy.rpc.UnregisterAppInterfaceResponse;
+import com.smartdevicelink.proxy.rpc.UnsubscribeButton;
+import com.smartdevicelink.proxy.rpc.UnsubscribeButtonResponse;
+import com.smartdevicelink.proxy.rpc.UnsubscribeVehicleData;
+import com.smartdevicelink.proxy.rpc.UnsubscribeVehicleDataResponse;
+import com.smartdevicelink.proxy.rpc.VehicleType;
+import com.smartdevicelink.proxy.rpc.VrHelpItem;
 import com.smartdevicelink.proxy.rpc.enums.AppHMIType;
 import com.smartdevicelink.proxy.rpc.enums.AudioStreamingState;
 import com.smartdevicelink.proxy.rpc.enums.AudioType;
@@ -89,6 +181,8 @@ import com.smartdevicelink.transport.TransportType;
 import com.smartdevicelink.util.DebugTool;
 
 public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase> {
+	
+	Logger logger = Logger.getLogger(SdlProxyBase.class.getName());
 	// Used for calls to Android Log class.
 	public static final String TAG = "SdlProxy";
 	private static final String SDL_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
@@ -235,7 +329,6 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 
 		@Override
 		public void onProtocolMessageReceived(ProtocolMessage msg) {
-
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data
             if ((msg.getData() != null && msg.getData().length > 0) ||
@@ -247,7 +340,7 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 		@Override
 		public void onProtocolSessionStarted(SessionType sessionType,
 				byte sessionID, byte version, String correlationID) {
-			
+			//TODO registerInterface
 			Intent sendIntent = createBroadcastIntent();
 			updateBroadcastIntent(sendIntent, "FUNCTION_NAME", "onProtocolSessionStarted");
 			updateBroadcastIntent(sendIntent, "COMMENT1", "SessionID: " + sessionID);
@@ -1460,12 +1553,17 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 		RPCMessage rpcMsg = new RPCMessage(hash);
 		String functionName = rpcMsg.getFunctionName();
 		String messageType = rpcMsg.getMessageType();
+		logger.info( messageType );
+		logger.info( functionName );
+		logger.info( hash.toString() );
 		
 		if (messageType.equals(RPCMessage.KEY_RESPONSE)) {	
 			//KEY_RESPONSE response
+			
 			SdlTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCResponse(rpcMsg), SDL_LIB_TRACE_KEY);
 
 			// Check to ensure response is not from an internal message (reserved correlation ID)
+			// handle internal msg
 			if (isCorrelationIDProtected((new RPCResponse(hash)).getCorrelationID())) {
 				// This is a response generated from an internal message, it can be trapped here
 				// The app should not receive a response for a request it did not send
@@ -2267,12 +2365,12 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 				}
 			} // end-if
 		} else if (messageType.equals(RPCMessage.KEY_NOTIFICATION)) {
+			//TODO KEY_NOTIFICATION
 			SdlTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCNotification(rpcMsg), SDL_LIB_TRACE_KEY);
 			if (functionName.equals(FunctionID.ON_HMI_STATUS)) {
 				// OnHMIStatus
 				
 				final OnHMIStatus msg = new OnHMIStatus(hash);
-
 				//setup lockscreeninfo
 				if (sdlSession != null)
 				{
@@ -2684,7 +2782,7 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 	}
 	
 	private void startRPCProtocolSession(byte sessionID, String correlationID) {
-		
+		//TODO
 		// Set Proxy Lifecyclek Available
 		if (_advancedLifecycleManagementEnabled) {
 			
@@ -2812,7 +2910,7 @@ public abstract class SdlProxyBase<proxyListenerType extends IProxyListenerBase>
 		sdlConn.startService(SessionType.PCM, sdlSession.getSessionId());
 		int infiniteLoopKiller = 0;
 		while (!navServiceResponseReceived && infiniteLoopKiller<2147483647) {
-			infiniteLoopKiller++;
+		infiniteLoopKiller++;
 		}
 		if (navServiceResponse) {
 			sdlConn.startStream(is, SessionType.PCM, sdlSession.getSessionId());

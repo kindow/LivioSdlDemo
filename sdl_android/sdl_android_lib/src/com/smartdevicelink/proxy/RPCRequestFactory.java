@@ -543,6 +543,7 @@ public class RPCRequestFactory {
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appType,
 			String appID, Integer correlationID) {
+		//TODO Register Msg
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {
