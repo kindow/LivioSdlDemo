@@ -16,7 +16,7 @@ public enum TextAlignment {
     /**
      * Text aligned centered.
      */
-    CENTERED;
+    CENTERED;  
 
     /**
      * Convert String to TextAlignment

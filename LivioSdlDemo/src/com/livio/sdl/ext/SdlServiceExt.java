@@ -1,21 +1,33 @@
 package com.livio.sdl.ext;
 
+import java.util.List;
+import java.util.logging.Logger;
+
 import android.widget.Toast;
 
 import com.livio.sdl.SdlService;
 import com.livio.sdl.menu.CommandButton;
-import com.livio.sdl.menu.MenuItem;
 import com.livio.sdl.menu.CommandButton.OnClickListener;
+import com.livio.sdl.menu.MenuItem;
+import com.smartdevicelink.exception.SdlException;
+import com.smartdevicelink.proxy.IProxyListener;
 import com.smartdevicelink.proxy.RPCRequest;
 import com.smartdevicelink.proxy.rpc.AddCommand;
 import com.smartdevicelink.proxy.rpc.AddCommandResponse;
+import com.smartdevicelink.proxy.rpc.DisplayCapabilities;
+import com.smartdevicelink.proxy.rpc.OnAppInterfaceUnregistered;
+import com.smartdevicelink.proxy.rpc.RegisterAppInterfaceResponse;
+import com.smartdevicelink.proxy.rpc.SetDisplayLayout;
+import com.smartdevicelink.proxy.rpc.UnregisterAppInterfaceResponse;
 
 /**
  * onXXX 方法用于 service 接受车机响应
+ * 
  * @author html5app
  *
  */
-public class SdlServiceExt extends SdlService {
+public class SdlServiceExt extends SdlService implements IProxyListener {
+	Logger logger = Logger.getLogger(SdlServiceExt.class.getName());
 	@Override
 	/**
 	 * Command Add Response
@@ -67,6 +79,7 @@ public class SdlServiceExt extends SdlService {
 
 	/**
 	 * 车机点击后手机响应事件
+	 * 
 	 * @param button
 	 */
 	protected void customButtonClickAction(CommandButton button) {
@@ -89,6 +102,46 @@ public class SdlServiceExt extends SdlService {
 
 		toast.setText(msg);
 		toast.show();
+	}
+
+	@Override
+	public void onProxyOpened() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onRegisterAppInterfaceResponse(
+			RegisterAppInterfaceResponse response) {
+		// TODO Auto-generated method stub
+		DisplayCapabilities dc;
+		try {
+			dc = super.sdlProxy.getDisplayCapabilities();
+			List<String> tps = dc.getTemplatesAvailable();
+			for (String string : tps) {
+				logger.info("tps info: " + string);
+			}
+			SetDisplayLayout command = new SetDisplayLayout();
+			command.setDisplayLayout(tps.get(0));
+			sendRpcRequest(command);
+		} catch (SdlException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onOnAppInterfaceUnregistered(
+			OnAppInterfaceUnregistered notification) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onUnregisterAppInterfaceResponse(
+			UnregisterAppInterfaceResponse response) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
